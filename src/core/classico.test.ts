@@ -279,11 +279,14 @@ describe('fléchettes', () => {
         x01('b', 200, 'fabos'),
         // Une partie sans l'autre ne compte nulle part, même avec un 180.
         { id: 'solo', fin: 250, mode: 'x01', config: { startScore: 501 }, places: [{ joueur: 'fabos', rang: 0, stats: { points: 501, darts: 9, count180: 2, highestCheckout: 170 } }, { joueur: null, rang: 1, stats: {} }] },
-        // Une partie à trois ne compte pas comme duel, mais nourrit les statistiques.
+        // À trois, celui des deux qui finit devant l'autre gagne le duel.
         { id: 'c', fin: 300, mode: 'x01', config: { startScore: 301 }, places: [{ joueur: 'pierrot', rang: 0, stats: { points: 301, darts: 15 } }, { joueur: 'fabos', rang: 1, stats: { points: 200, darts: 15 } }, { joueur: null, rang: 2, stats: {} }] },
       ],
     }, ['pierrot', 'fabos']);
-    expect(b.confrontations).toHaveLength(2);
+    expect(b.confrontations).toHaveLength(3);
+    expect(b.confrontations[2]).toMatchObject({ gagnant: 'pierrot', titre: '301' });
+    // Pas de ceinture pour un jeu jamais pratiqué ensemble.
+    expect(b.epreuves.map((e) => e.cle)).toEqual(['flechettes.duel', 'flechettes.moyenne', 'flechettes.checkout']);
     expect(b.confrontations[0]).toMatchObject({ gagnant: 'pierrot', titre: '501', score: { pierrot: 2, fabos: 1 }, detail: 'moyenne de 50,1' });
     const moyenne = b.epreuves.find((e) => e.cle === 'flechettes.moyenne')!;
     expect(moyenne.affichage).toEqual({ pierrot: '51,2', fabos: '44,4' });

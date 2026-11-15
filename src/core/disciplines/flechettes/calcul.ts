@@ -29,13 +29,14 @@ export function titreDe(p: PartieFlechettes): string {
 type Cumul = {
   points: number; darts: number; c180: number; checkout: number; meilleurLeg: number;
   marques: number; manches: number; parties: number;
+  hammer: number | null; halveit: number | null;
 };
 
 const virgule = (n: number, d = 1) => n.toFixed(d).replace('.', ',');
 
 export function calculerFlechettes(brut: BrutFlechettes, joueurs: string[]): BilanDiscipline {
   const cumul = new Map<string, Cumul>(joueurs.map((j) => [j, {
-    points: 0, darts: 0, c180: 0, checkout: 0, meilleurLeg: 0, marques: 0, manches: 0, parties: 0,
+    points: 0, darts: 0, c180: 0, checkout: 0, meilleurLeg: 0, marques: 0, manches: 0, parties: 0, hammer: null, halveit: null,
   }]));
   const confrontations: Confrontation[] = [];
   const t180: Record<string, TropheeObtenu> = {};
@@ -61,12 +62,18 @@ export function calculerFlechettes(brut: BrutFlechettes, joueurs: string[]): Bil
       } else if (p.mode === 'cricket') {
         c.marques += s.marks ?? 0;
         c.manches += s.rounds ?? 0;
+      } else if (p.mode === 'hammer' && typeof s.points === 'number') {
+        c.hammer = Math.max(c.hammer ?? -Infinity, s.points);
+      } else if (p.mode === 'halveit' && typeof s.points === 'number') {
+        c.halveit = Math.max(c.halveit ?? -Infinity, s.points);
       }
     }
 
-    // Une confrontation : exactement deux places, tenues par deux joueurs du Classico.
-    if (p.places.length !== 2 || assis.length !== 2 || assis[0].joueur === assis[1].joueur) continue;
+    // Une confrontation : deux joueurs du Classico à la cible, seuls ou avec d'autres.
+    // À trois ou plus, celui des deux qui finit devant l'autre l'emporte.
+    if (assis.length !== 2 || assis[0].joueur === assis[1].joueur) continue;
     const [x, y] = assis;
+    const autres = p.places.length - 2;
     const gagnant = x.rang === y.rang ? null : x.rang < y.rang ? x.joueur! : y.joueur!;
     const legs = p.mode === 'x01' && (p.config.legsToWin ?? 1) > 1;
     const moyenne = (pl: PlaceFlechettes) => (pl.stats.darts ? (pl.stats.points ?? 0) / pl.stats.darts * 3 : null);
@@ -75,7 +82,7 @@ export function calculerFlechettes(brut: BrutFlechettes, joueurs: string[]): Bil
       id: `flechettes:${p.id}`, discipline: 'flechettes', epreuve: 'flechettes.duel', date: p.fin,
       joueurs: [x.joueur!, y.joueur!], gagnant, titre: titreDe(p),
       ...(legs ? { score: { [x.joueur!]: x.stats.legsWon ?? 0, [y.joueur!]: y.stats.legsWon ?? 0 } } : {}),
-      ...(mg ? { detail: `moyenne de ${virgule(mg)}` } : {}),
+      ...(mg ? { detail: `moyenne de ${virgule(mg)}` } : autres > 0 ? { detail: `partie à ${p.places.length}` } : {}),
     });
   }
 
@@ -90,8 +97,8 @@ export function calculerFlechettes(brut: BrutFlechettes, joueurs: string[]): Bil
     return { valeurs, affichage };
   };
 
-  const epreuves: Epreuve[] = [
-    { cle: 'flechettes.duel', nom: 'Face-à-face aux fléchettes', genre: 'duel', majeure: true },
+  // Une ceinture mineure par jeu réellement pratiqué ensemble : pas de ceinture sans valeur.
+  const mineures: Epreuve[] = [
     {
       cle: 'flechettes.moyenne', nom: 'Moyenne en X01', genre: 'mesure', majeure: false, sens: 1,
       // Arrondie au dixième : c'est la valeur affichée qui départage, pas une décimale invisible.
@@ -103,6 +110,25 @@ export function calculerFlechettes(brut: BrutFlechettes, joueurs: string[]): Bil
       ...mesure((c) => c.checkout || null),
       pique: 'Plus gros checkout : {va} pour {a}, {vb} pour {b}.',
     },
+    {
+      cle: 'flechettes.mpr', nom: 'Marques par manche au cricket', genre: 'mesure', majeure: false, sens: 1,
+      ...mesure((c) => (c.manches >= 5 ? Math.round(c.marques / c.manches * 100) / 100 : null), (n) => virgule(n, 2)),
+      pique: 'Au cricket, {a} tourne à {va} marques par manche, {b} à {vb}.',
+    },
+    {
+      cle: 'flechettes.hammer', nom: 'Record au Hammer', genre: 'mesure', majeure: false, sens: 1,
+      ...mesure((c) => c.hammer),
+      pique: 'Record au Hammer : {va} pour {a}, {vb} pour {b}.',
+    },
+    {
+      cle: 'flechettes.halveit', nom: 'Record au Halve-it', genre: 'mesure', majeure: false, sens: 1,
+      ...mesure((c) => c.halveit),
+      pique: 'Record au Halve-it : {va} pour {a}, {vb} pour {b}.',
+    },
+  ];
+  const epreuves: Epreuve[] = [
+    { cle: 'flechettes.duel', nom: 'Face-à-face aux fléchettes', genre: 'duel', majeure: true },
+    ...mineures.filter((e) => Object.values(e.valeurs ?? {}).some((v) => v !== null)),
   ];
 
   const faits: Fait[] = [
@@ -115,11 +141,6 @@ export function calculerFlechettes(brut: BrutFlechettes, joueurs: string[]): Bil
       cle: 'flechettes.leg', nom: 'Meilleur leg (fléchettes)', sens: -1,
       ...mesure((c) => c.meilleurLeg || null),
       pique: 'Meilleur leg : {va} fléchettes pour {a}, {vb} pour {b}.',
-    },
-    {
-      cle: 'flechettes.mpr', nom: 'Marques par manche au cricket', sens: 1,
-      ...mesure((c) => (c.manches >= 5 ? Math.round(c.marques / c.manches * 100) / 100 : null), (n) => virgule(n, 2)),
-      pique: 'Au cricket, {a} tourne à {va} marques par manche, {b} à {vb}.',
     },
     {
       cle: 'flechettes.volume', nom: 'Parties jouées', sens: 1,

@@ -31,7 +31,7 @@ Il descend du Vestiaire (le classement d'échecs du groupe), mais change de suje
 - Score général par ceintures, toutes disciplines confondues.
 - Saisons mensuelles, palmarès et gage du perdant.
 - Échecs : Elo des trois cadences, face-à-face, record aux problèmes, Puzzle Rush, battle de problèmes.
-- Fléchettes : face-à-face, moyenne en X01, plus gros checkout, depuis Bullcast.
+- Fléchettes : face-à-face, plus une ceinture par jeu pratiqué (X01, cricket, Hammer, Halve-it), depuis Bullcast.
 - Munitions classées par force, selon le camp choisi, et les ripostes à prévoir.
 - Fil d'actu, trophées, affiche partageable en image, notifications ntfy.
 - Disciplines manuelles sans code (ping-pong, pétanque…) et déclaration d'un résultat depuis le téléphone.
@@ -115,9 +115,14 @@ Source : Bullcast. Comptes : `pierrot` et `fabos`.
 
 | Épreuve | Genre | Poids | Règle |
 |---|---|---|---|
-| Face-à-face aux fléchettes | Duel | Majeure | Parties à deux places exactement, tenues par les deux joueurs, tous modes de jeu |
+| Face-à-face aux fléchettes | Duel | Majeure | Toute partie où les deux joueurs sont à la cible, tous modes de jeu. À trois ou plus, celui des deux qui finit devant l'autre gagne |
 | Moyenne en X01 | Mesure | Mineure | Points par volée de trois fléchettes, sur les parties X01 jouées ensemble (30 fléchettes minimum) |
 | Plus gros checkout | Mesure | Mineure | Plus haute finition en X01 |
+| Marques par manche au cricket | Mesure | Mineure | Sur les parties de cricket jouées ensemble (5 manches minimum) |
+| Record au Hammer | Mesure | Mineure | Meilleur total sur une partie |
+| Record au Halve-it | Mesure | Mineure | Meilleur total sur une partie |
+
+Une ceinture mineure n'existe que si le jeu a déjà été joué ensemble : pas de ceinture vide pour un jeu que personne ne pratique.
 
 Toutes les statistiques de fléchettes, ceintures et trophées compris, ne portent que sur les parties où Pierrot et Fabos étaient tous les deux à la cible, à deux ou avec d'autres. Ce que chacun fait de son côté ne compte pas.
 
@@ -283,7 +288,7 @@ Le produit est un face-à-face ; la technique ne l'impose pas.
 - `classico.json` accepte autant de joueurs qu'on veut. Le moteur calcule un duel par paire.
 - Les ceintures, les saisons, les munitions et les trophées sont attachés à une paire.
 - Avec plus d'un duel, un sélecteur apparaît dans l'en-tête.
-- Ce qu'il resterait à concevoir pour un vrai mode groupe : un classement général entre les paires, et des épreuves à plus de deux (une partie de fléchettes à trois ne compte aujourd'hui pour aucun duel).
+- Ce qu'il resterait à concevoir pour un vrai mode groupe : un classement général entre les paires, et des épreuves à plus de deux (une partie de fléchettes à trois compte aujourd'hui comme un duel entre les deux joueurs de la paire).
 
 ## 10. Cas limites
 
