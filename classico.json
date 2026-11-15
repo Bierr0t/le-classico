@@ -1,10 +1,29 @@
 {
   "nom": "Le Classico",
   "joueurs": [
-    { "cle": "pierrot", "nom": "Pierrot", "couleur": "#FF5A3C", "comptes": { "chesscom": "bi3rmat", "bullcast": "pierrot" } },
-    { "cle": "fabos", "nom": "Fabos", "couleur": "#3D8BFF", "comptes": { "chesscom": "fabosinho", "bullcast": "fabos" } }
+    {
+      "cle": "pierrot",
+      "nom": "Pierrot",
+      "couleur": "#FF5A3C",
+      "comptes": {
+        "chesscom": "bi3rmat",
+        "bullcast": "pierrot"
+      }
+    },
+    {
+      "cle": "fabos",
+      "nom": "Fabos",
+      "couleur": "#3D8BFF",
+      "comptes": {
+        "chesscom": "fabosinho",
+        "bullcast": "fabos"
+      }
+    }
   ],
-  "disciplines": ["echecs", "flechettes"],
+  "disciplines": [
+    "echecs",
+    "flechettes"
+  ],
   "manuelles": [],
   "gages": [
     "Tu paies la prochaine tournée.",
@@ -16,5 +35,8 @@
   ],
   "ntfy": "le-classico-7c41e9b2",
   "url": "https://bierr0t.github.io/le-classico/",
-  "depot": "Bierr0t/le-classico"
+  "depot": "Bierr0t/le-classico",
+  "push": {
+    "clePublique": "BGN4z_qFphqdM1D4vSUEJ6h01SCRNDP9X_ktyInK-Wnb9Ov0Z4XuFzKqVcR_dE4lsUTaWTgHZo7YDjNqQQCcXB4"
+  }
 }
