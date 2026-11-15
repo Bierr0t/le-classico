@@ -1,0 +1,61 @@
+name: Saisie d'un résultat
+
+# Un résultat se déclare en ouvrant une issue avec le formulaire « Déclarer un résultat ».
+# Seuls le propriétaire du dépôt et ses collaborateurs sont écoutés.
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: saisie
+  cancel-in-progress: false
+
+jobs:
+  enregistrer:
+    if: >-
+      contains(github.event.issue.labels.*.name, 'resultat') &&
+      contains(fromJSON('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.issue.author_association)
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NUMERO: ${{ github.event.issue.number }}
+      # Le contenu de l'issue ne passe que par cette variable : il n'est jamais interpolé dans une commande.
+      ISSUE_BODY: ${{ github.event.issue.body }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      - name: Enregistrer le résultat
+        id: saisie
+        run: |
+          if npm run --silent resultat -- --issue > message.txt 2>&1; then
+            echo "ok=oui" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=non" >> "$GITHUB_OUTPUT"
+          fi
+          cat message.txt
+
+      - name: Publier
+        if: steps.saisie.outputs.ok == 'oui'
+        run: |
+          git config user.name "Le Classico"
+          git config user.email "actions@users.noreply.github.com"
+          git add saisies
+          git commit --quiet -m "Résultat déclaré dans l'issue #$NUMERO"
+          git push --quiet
+          gh workflow run collecte.yml --ref "${GITHUB_REF_NAME}"
+          gh issue close "$NUMERO" --comment "$(cat message.txt) Le site sera à jour dans deux ou trois minutes."
+
+      - name: Expliquer le refus
+        if: steps.saisie.outputs.ok == 'non'
+        run: gh issue comment "$NUMERO" --body "Résultat refusé. $(cat message.txt) Corrige et ouvre une nouvelle déclaration."

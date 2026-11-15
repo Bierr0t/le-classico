@@ -1,0 +1,11 @@
+{
+  "name": "Le Classico",
+  "short_name": "Classico",
+  "description": "Pierrot contre Fabos : le score, les ceintures et de quoi chambrer",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0F0E13",
+  "theme_color": "#0F0E13",
+  "lang": "fr",
+  "icons": [{ "src": "icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

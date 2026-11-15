@@ -1,0 +1,38 @@
+name: Déclarer un résultat
+description: Pour les épreuves que personne ne publie à notre place (battle de problèmes, disciplines manuelles).
+title: "Résultat : "
+labels: [resultat]
+body:
+  - type: input
+    id: discipline
+    attributes:
+      label: Discipline
+      description: "echecs-battle pour une battle de problèmes, ou la clé d'une discipline manuelle de classico.json."
+      value: echecs-battle
+    validations:
+      required: true
+  - type: dropdown
+    id: gagnant
+    attributes:
+      label: Gagnant
+      options:
+        - pierrot
+        - fabos
+        - nul
+    validations:
+      required: true
+  - type: input
+    id: score
+    attributes:
+      label: Score
+      description: "Facultatif. Dans l'ordre Pierrot-Fabos, par exemple 12-9."
+  - type: input
+    id: date
+    attributes:
+      label: Date
+      description: "Facultatif, au format AAAA-MM-JJ. Par défaut : aujourd'hui."
+  - type: input
+    id: note
+    attributes:
+      label: Note
+      description: "Facultatif. Une ligne de contexte, affichée dans l'historique."
