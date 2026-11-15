@@ -1,4 +1,5 @@
 import type { Contexte } from '../contrat.ts';
+import { resoudreBattles } from './battles.ts';
 import type { BrutEchecs, SourceEchecs } from './calcul.ts';
 import { compacter, type Partie, type PartieApi, type ProfilApi, type StatsApi } from './chesscom.ts';
 
@@ -72,5 +73,5 @@ export async function collecterEchecs(ctx: Contexte): Promise<BrutEchecs> {
     if (pseudo) sources.push(await collecterJoueur(ctx, j.cle, pseudo, etat));
   }
   await ctx.ecrire('etat.json', etat);
-  return { sources, battles: await ctx.saisies('echecs-battle') };
+  return { sources, battles: await resoudreBattles(ctx, await ctx.saisies('echecs-battle')) };
 }

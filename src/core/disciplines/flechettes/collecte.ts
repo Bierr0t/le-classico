@@ -81,7 +81,8 @@ export function compacter(lignes: Ligne[], comptes: Map<string, string>): Partie
     for (const [k, v] of Object.entries(json<Record<string, unknown>>(l.stats, {}))) if (typeof v === 'number') stats[k] = v;
     p.places.push({ joueur, rang: l.rang, stats });
   }
-  return [...parties.values()].filter((p) => p.places.some((pl) => pl.joueur));
+  // On ne garde que les parties où deux joueurs du Classico au moins sont à la cible ensemble.
+  return [...parties.values()].filter((p) => new Set(p.places.map((pl) => pl.joueur).filter(Boolean)).size >= 2);
 }
 
 export async function collecterFlechettes(ctx: Contexte): Promise<BrutFlechettes> {

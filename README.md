@@ -24,10 +24,16 @@ npm test
 
 ## Déclarer une battle de problèmes
 
-chess.com ne publie pas les résultats des battles. On les déclare :
+chess.com ne liste nulle part les battles d'un joueur, mais chaque battle a une page publique. On déclare donc une battle en donnant son lien (`https://www.chess.com/puzzles/battle/XXXX`, l'adresse de la page en fin de battle) : le collecteur y lit le vainqueur, le score et la date, et refuse une battle qui n'oppose pas les deux joueurs.
 
-- depuis l'app : Le ring, Échecs, « Déclarer un résultat » (il faut un compte GitHub invité sur le dépôt) ;
+- depuis l'app : Le ring, Échecs, « Déclarer un résultat », puis coller le lien (il faut un compte GitHub invité sur le dépôt) ;
 - ou en ligne de commande, puis `git push` :
+
+```sh
+npm run resultat -- echecs-battle https://www.chess.com/puzzles/battle/2oXe7a5Sn
+```
+
+Sans lien, la saisie à la main reste possible :
 
 ```sh
 npm run resultat -- echecs-battle pierrot 12-9

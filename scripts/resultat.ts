@@ -1,6 +1,7 @@
 /**
  * Enregistre un résultat saisi à la main dans saisies/{fichier}.json.
  *
+ *   npm run resultat -- echecs-battle https://www.chess.com/puzzles/battle/2oXe7a5Sn
  *   npm run resultat -- echecs-battle pierrot 12-9
  *   npm run resultat -- echecs-battle nul 10-10 2026-11-14 "revanche demandée"
  *   npm run resultat -- --issue      lit le formulaire GitHub dans la variable ISSUE_BODY
@@ -11,6 +12,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Saisie } from '../src/core/disciplines/contrat.ts';
+import { codeBattle, lienBattle } from '../src/core/disciplines/echecs/battles.ts';
 import { paris } from '../src/core/temps.ts';
 import type { Config } from '../src/core/types.ts';
 
@@ -55,6 +57,14 @@ export function construire(
   return saisie;
 }
 
+/** Une battle déclarée par son lien : chess.com dira qui a gagné au prochain passage du collecteur. */
+export function construireLien(fichier: string, lien: string): { lien: string } {
+  if (fichier !== 'echecs-battle') throw new Error('Un lien ne se déclare que pour une battle de problèmes (echecs-battle).');
+  const code = codeBattle(lien);
+  if (!code) throw new Error(`Lien illisible : « ${lien.slice(0, 120)} ». Attendu : https://www.chess.com/puzzles/battle/XXXX.`);
+  return { lien: lienBattle(code) };
+}
+
 /** Lit un formulaire d'issue GitHub : des blocs « ### Titre » suivis de la réponse. */
 export function lireFormulaire(corps: string): Record<string, string> {
   const champs: Record<string, string> = {};
@@ -69,23 +79,33 @@ export function lireFormulaire(corps: string): Record<string, string> {
 async function main() {
   const config = JSON.parse(await readFile(join(RACINE, 'classico.json'), 'utf8')) as Config;
   const aujourdhui = paris(Date.now() / 1000).jour;
-  let fichier: string, saisie: Saisie;
+  type Ligne = Saisie | { lien: string };
+  let fichier: string, saisie: Ligne;
   if (process.argv.includes('--issue')) {
     const f = lireFormulaire(process.env.ISSUE_BODY ?? '');
     fichier = (f['discipline'] ?? '').trim();
-    saisie = construire(config, fichier, f['gagnant'] ?? '', f['score'], f['date'], f['note'], aujourdhui);
+    const lien = (f['lien de la battle'] ?? '').trim();
+    saisie = lien
+      ? construireLien(fichier, lien)
+      : construire(config, fichier, f['gagnant'] ?? '', f['score'], f['date'], f['note'], aujourdhui);
   } else {
     const [f, gagnant, score, date, note] = process.argv.slice(2);
-    if (!f || !gagnant) throw new Error('Usage : npm run resultat -- <discipline> <gagnant|nul> [score] [AAAA-MM-JJ] [note]');
+    if (!f || !gagnant) throw new Error('Usage : npm run resultat -- <discipline> <lien de battle | gagnant | nul> [score] [AAAA-MM-JJ] [note]');
     fichier = f;
-    saisie = construire(config, f, gagnant, score, date, note, aujourdhui);
+    saisie = /chess\.com\//.test(gagnant) ? construireLien(f, gagnant) : construire(config, f, gagnant, score, date, note, aujourdhui);
   }
   const chemin = join(RACINE, 'saisies', `${fichier}.json`);
-  let liste: Saisie[] = [];
+  let liste: Ligne[] = [];
   try { liste = JSON.parse(await readFile(chemin, 'utf8')); } catch { /* premier résultat de la discipline */ }
+  if (!('date' in saisie) && liste.some((l) => l.lien === saisie.lien)) throw new Error('Cette battle est déjà déclarée.');
   liste.push(saisie);
-  liste.sort((x, y) => (x.date < y.date ? -1 : x.date > y.date ? 1 : 0));
+  const jour = (l: Ligne) => ('date' in l ? l.date : '9999');
+  liste.sort((x, y) => (jour(x) < jour(y) ? -1 : jour(x) > jour(y) ? 1 : 0));
   await writeFile(chemin, `[\n${liste.map((s) => `  ${JSON.stringify(s)}`).join(',\n')}\n]\n`);
+  if (!('date' in saisie)) {
+    console.log(`Battle enregistrée : ${saisie.lien}. Le résultat sera lu sur chess.com au prochain passage.`);
+    return;
+  }
   const qui = saisie.gagnant ? `victoire de ${saisie.gagnant}` : 'match nul';
   const score = saisie.score ? ` (${Object.values(saisie.score).join('-')})` : '';
   console.log(`Enregistré dans saisies/${fichier}.json : ${qui}${score}, le ${saisie.date}.`);

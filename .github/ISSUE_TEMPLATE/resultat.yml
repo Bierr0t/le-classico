@@ -11,16 +11,20 @@ body:
       value: echecs-battle
     validations:
       required: true
+  - type: input
+    id: lien
+    attributes:
+      label: Lien de la battle
+      description: "Pour une battle de problèmes : colle le lien chess.com (https://www.chess.com/puzzles/battle/XXXX) et laisse le reste vide. Le résultat est lu sur chess.com."
   - type: dropdown
     id: gagnant
     attributes:
       label: Gagnant
+      description: "Inutile si tu as donné le lien."
       options:
         - pierrot
         - fabos
         - nul
-    validations:
-      required: true
   - type: input
     id: score
     attributes:

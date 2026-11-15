@@ -43,7 +43,9 @@ export function calculerFlechettes(brut: BrutFlechettes, joueurs: string[]): Bil
 
   for (const p of [...brut.parties].sort((x, y) => x.fin - y.fin)) {
     const assis = p.places.filter((pl) => pl.joueur && cumul.has(pl.joueur));
-    // Statistiques individuelles : seulement les parties à deux places ou plus, hors entraînement en solo.
+    // Seules comptent les parties où deux joueurs du Classico au moins étaient à la cible ensemble :
+    // une moyenne faite contre d'autres, ou seul, ne dit rien de la rivalité.
+    if (new Set(assis.map((pl) => pl.joueur)).size < 2) continue;
     for (const pl of assis) {
       const c = cumul.get(pl.joueur!)!;
       const s = pl.stats;

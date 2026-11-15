@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { construire, lireFormulaire } from '../../scripts/resultat.ts';
+import { construire, construireLien, lireFormulaire } from '../../scripts/resultat.ts';
+import { codeBattle, saisieDepuisBattle } from './disciplines/echecs/battles.ts';
 import { confrontationsSaisies } from './disciplines/contrat.ts';
 import { calculerEchecs } from './disciplines/echecs/calcul.ts';
 import type { Partie } from './disciplines/echecs/chesscom.ts';
@@ -191,6 +192,38 @@ describe('échecs', () => {
   });
 });
 
+describe('battles de problèmes', () => {
+  const comptes = new Map([['bi3rmat', 'pierrot'], ['fabosinho', 'fabos']]);
+  const joueur = (username: string, verdict: string, resolus: number, rates: number) => ({
+    details: { username }, result: { verdict },
+    puzzles: [...Array(resolus).fill({ state: 'completed' }), ...Array(rates).fill({ state: 'failed' })],
+  });
+  const battle = (a: ReturnType<typeof joueur>, b: ReturnType<typeof joueur>, state = 'completed') => ({
+    state, startedAt: '2026-11-14T21:30:00.000Z', shortUuid: '2oXe7a5Sn', players: { x: a, y: b },
+  });
+
+  it('lit le code d\'une battle dans son lien', () => {
+    expect(codeBattle('https://www.chess.com/puzzles/battle/2oXe7a5Sn')).toBe('2oXe7a5Sn');
+    expect(codeBattle('https://www.chess.com/fr/puzzles/battle/default/2oXe7a5Sn?ref=x')).toBe('2oXe7a5Sn');
+    expect(codeBattle(' 2oXe7a5Sn ')).toBe('2oXe7a5Sn');
+    expect(codeBattle('https://www.chess.com/puzzles/battle')).toBeNull();
+    expect(codeBattle('https://exemple.fr/puzzles/battle/2oXe7a5Sn')).toBeNull();
+    expect(construireLien('echecs-battle', 'https://www.chess.com/puzzles/battle/2oXe7a5Sn/')).toEqual({ lien: 'https://www.chess.com/puzzles/battle/2oXe7a5Sn' });
+    expect(() => construireLien('pingpong', 'https://www.chess.com/puzzles/battle/2oXe7a5Sn')).toThrow();
+  });
+
+  it('tire le vainqueur et le score de la réponse de chess.com', () => {
+    const s = saisieDepuisBattle(battle(joueur('Bi3rmat', 'loss', 27, 3), joueur('fabosinho', 'win', 38, 3)), comptes, '2oXe7a5Sn');
+    expect(s).toEqual({ date: '2026-11-14', gagnant: 'fabos', score: { pierrot: 27, fabos: 38 }, lien: 'https://www.chess.com/puzzles/battle/2oXe7a5Sn' });
+    expect(saisieDepuisBattle(battle(joueur('bi3rmat', 'draw', 20, 3), joueur('fabosinho', 'draw', 20, 3)), comptes, 'x')).toMatchObject({ gagnant: null });
+  });
+
+  it('refuse une battle en cours ou jouée contre quelqu\'un d\'autre', () => {
+    expect(saisieDepuisBattle(battle(joueur('bi3rmat', '', 0, 0), joueur('fabosinho', '', 0, 0), 'created'), comptes, 'x')).toMatch(/pas terminée/);
+    expect(saisieDepuisBattle(battle(joueur('bi3rmat', 'win', 30, 1), joueur('Inconnu', 'loss', 10, 3)), comptes, 'x')).toMatch(/pas un duel/);
+  });
+});
+
 describe('fléchettes', () => {
   const x01 = (id: string, fin: number, gagnant: 'pierrot' | 'fabos', extra: Record<string, number> = {}): PartieFlechettes => ({
     id, fin, mode: 'x01', config: { startScore: 501, legsToWin: 2 },
@@ -206,6 +239,8 @@ describe('fléchettes', () => {
       parties: [
         x01('a', 100, 'pierrot', { count180: 1, highestCheckout: 121 }),
         x01('b', 200, 'fabos'),
+        // Une partie sans l'autre ne compte nulle part, même avec un 180.
+        { id: 'solo', fin: 250, mode: 'x01', config: { startScore: 501 }, places: [{ joueur: 'fabos', rang: 0, stats: { points: 501, darts: 9, count180: 2, highestCheckout: 170 } }, { joueur: null, rang: 1, stats: {} }] },
         // Une partie à trois ne compte pas comme duel, mais nourrit les statistiques.
         { id: 'c', fin: 300, mode: 'x01', config: { startScore: 301 }, places: [{ joueur: 'pierrot', rang: 0, stats: { points: 301, darts: 15 } }, { joueur: 'fabos', rang: 1, stats: { points: 200, darts: 15 } }, { joueur: null, rang: 2, stats: {} }] },
       ],

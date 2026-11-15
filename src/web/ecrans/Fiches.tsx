@@ -59,7 +59,7 @@ export function FicheDiscipline({ cle, onFermer }: { cle: string; onFermer: () =
               Déclarer un résultat · {s.nom}
             </a>
           ))}
-          <p className="note">Ces résultats ne sont publiés nulle part : c'est le vainqueur qui déclare, et le perdant qui vérifie.</p>
+          <p className="note">Pour une battle de problèmes, colle le lien de la battle (chess.com/puzzles/battle/…) : le résultat est lu sur chess.com, personne ne peut tricher.</p>
         </section>
       )}
 

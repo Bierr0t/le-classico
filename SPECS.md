@@ -103,9 +103,9 @@ Source : API publique de chess.com. Comptes : `bi3rmat` (Pierrot), `fabosinho` (
 | Face-à-face aux échecs | Duel | Majeure | Toutes les parties entre les deux, classées ou non. Une victoire en rapide pèse 3, en blitz 2, en bullet 1 : la ceinture va à celui qui a le plus de points, pas le plus de victoires |
 | Record aux problèmes | Mesure | Mineure | Plus haut classement atteint aux problèmes |
 | Puzzle Rush | Mesure | Mineure | Meilleur score |
-| Battle de problèmes | Duel | Majeure | Résultats déclarés à la main |
+| Battle de problèmes | Duel | Majeure | Battles déclarées par leur lien ; le résultat est lu sur chess.com |
 
-**Limite connue.** chess.com ne publie pas les résultats des battles de problèmes, ni le classement courant aux problèmes (seulement le record). Les battles sont donc déclarées par les joueurs (section 4.3). Le jour où chess.com les expose, seul le collecteur des échecs change.
+**Battles de problèmes.** chess.com ne propose aucune liste des battles d'un joueur : ni dans son API publique, ni sur les pages de profil. En revanche chaque battle a une page publique, et son résultat se lit sans compte à partir de son lien. Une battle se déclare donc en collant son lien (section 4.3) ; le collecteur lit sur chess.com les deux pseudos, le verdict, le nombre de problèmes résolus par chacun et la date. Il refuse une battle en cours, ou qui n'oppose pas les deux joueurs. Ces routes de chess.com ne sont pas documentées et peuvent changer : une battle déjà lue est conservée, et la saisie à la main reste possible.
 
 Hors ceintures, pour les munitions : record d'Elo par cadence, plus longue série de victoires, pire série de défaites, nombre de parties.
 
@@ -116,8 +116,10 @@ Source : Bullcast. Comptes : `pierrot` et `fabos`.
 | Épreuve | Genre | Poids | Règle |
 |---|---|---|---|
 | Face-à-face aux fléchettes | Duel | Majeure | Parties à deux places exactement, tenues par les deux joueurs, tous modes de jeu |
-| Moyenne en X01 | Mesure | Mineure | Points par volée de trois fléchettes, sur toutes les parties X01 (30 fléchettes minimum) |
+| Moyenne en X01 | Mesure | Mineure | Points par volée de trois fléchettes, sur les parties X01 jouées ensemble (30 fléchettes minimum) |
 | Plus gros checkout | Mesure | Mineure | Plus haute finition en X01 |
+
+Toutes les statistiques de fléchettes, ceintures et trophées compris, ne portent que sur les parties où Pierrot et Fabos étaient tous les deux à la cible, à deux ou avec d'autres. Ce que chacun fait de son côté ne compte pas.
 
 Hors ceintures : nombre de 180, meilleur leg, marques par manche au cricket, nombre de parties. Les parties d'entraînement contre le bot et les parties signalées comme douteuses par Bullcast sont exclues.
 

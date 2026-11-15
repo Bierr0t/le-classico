@@ -41,6 +41,8 @@ export type Saisie = {
   joueurs?: string[];
   score?: Record<string, number>;
   note?: string;
+  /** Lien vers la preuve. Pour une battle de problèmes, le lien seul suffit : le reste est lu sur chess.com. */
+  lien?: string;
 };
 
 export function confrontationsSaisies(
@@ -64,6 +66,7 @@ export function confrontationsSaisies(
       gagnant: s.gagnant,
       ...(score ? { score } : {}),
       ...(s.note ? { detail: s.note } : {}),
+      ...(s.lien ? { lien: s.lien } : {}),
     });
   }
   return liste;
