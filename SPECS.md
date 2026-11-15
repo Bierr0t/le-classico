@@ -65,6 +65,7 @@ Ce score bouge de deux façons : en gagnant un duel, ou en progressant seul (mon
 
 - Une saison dure un mois civil, heure de Paris.
 - Chaque confrontation directe rapporte **3 points** au vainqueur, **1 point** chacun en cas de nul, quelle que soit la discipline.
+- Une confrontation peut porter un **poids**, qui multiplie ces points. Aux échecs : rapide ×3, blitz ×2, bullet ×1. Une victoire en rapide rapporte donc 9 points de saison, en bullet 3. Les autres confrontations (fléchettes, battles) pèsent 1.
 - À la fin du mois, le premier gagne la saison. Égalité : saison partagée.
 - Le perdant doit un **gage**, tiré dans la liste de `classico.json`. Le tirage dépend du mois : le gage est connu dès le premier jour, il ne change pas en cours de route.
 - Le **palmarès** compte les saisons gagnées.
@@ -99,7 +100,7 @@ Source : API publique de chess.com. Comptes : `bi3rmat` (Pierrot), `fabosinho` (
 | Épreuve | Genre | Poids | Règle |
 |---|---|---|---|
 | Elo rapide, blitz, bullet | Mesure | Mineure | Elo actuel de la cadence |
-| Face-à-face aux échecs | Duel | Majeure | Toutes les parties entre les deux, toutes cadences, classées ou non |
+| Face-à-face aux échecs | Duel | Majeure | Toutes les parties entre les deux, classées ou non. Une victoire en rapide pèse 3, en blitz 2, en bullet 1 : la ceinture va à celui qui a le plus de points, pas le plus de victoires |
 | Record aux problèmes | Mesure | Mineure | Plus haut classement atteint aux problèmes |
 | Puzzle Rush | Mesure | Mineure | Meilleur score |
 | Battle de problèmes | Duel | Majeure | Résultats déclarés à la main |

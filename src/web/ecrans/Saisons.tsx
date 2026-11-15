@@ -96,6 +96,7 @@ export function Saisons() {
       <section className="regle">
         <h2>La règle</h2>
         <p>Une saison dure un mois. Chaque duel direct compte, quelle que soit la discipline : {POINTS.victoire} points la victoire, {POINTS.nul} point le nul. Le premier du mois terminé gagne la saison, le second s'acquitte du gage.</p>
+        {duel.ceintures.filter((c) => c.regle).map((c) => <p key={c.epreuve}>{c.regle} La saison suit la même échelle.</p>)}
       </section>
     </>
   );

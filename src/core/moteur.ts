@@ -47,17 +47,24 @@ function ceinturesDe(
         const depuis = tenant === null ? undefined : avant ? (avant.tenant === tenant ? avant.depuis : maintenant) : undefined;
         liste.push({ ...base, tenant, depuis, affichage: { [a]: e.affichage?.[a] ?? '—', [b]: e.affichage?.[b] ?? '—' } });
       } else {
+        // v : points pondérés, ce sont eux qui désignent le tenant. n : victoires brutes.
         const v = { [a]: 0, [b]: 0 };
+        const n = { [a]: 0, [b]: 0 };
         let nulles = 0;
         let tenant: string | null = null;
         let depuis: number | undefined;
+        let pondere = false;
         for (const c of confs) {
           if (c.epreuve !== e.cle) continue;
-          if (c.gagnant) v[c.gagnant]++; else nulles++;
+          if ((c.poids ?? 1) !== 1) pondere = true;
+          if (c.gagnant) { v[c.gagnant] += c.poids ?? 1; n[c.gagnant]++; } else nulles++;
           const meneur = v[a] === v[b] ? null : v[a] > v[b] ? a : b;
           if (meneur !== tenant) { tenant = meneur; depuis = meneur ? c.date : undefined; }
         }
-        liste.push({ ...base, tenant, depuis, affichage: { [a]: String(v[a]), [b]: String(v[b]) }, nulles });
+        liste.push({
+          ...base, tenant, depuis, affichage: { [a]: String(v[a]), [b]: String(v[b]) }, nulles,
+          ...(pondere ? { victoires: n } : {}), ...(e.regle ? { regle: e.regle } : {}),
+        });
       }
     }
   }
@@ -82,13 +89,14 @@ function saisonsDe(a: string, b: string, confs: Confrontation[], gages: string[]
     };
     for (const c of liste) {
       const d = (s.parDiscipline[c.discipline] ??= { [a]: 0, [b]: 0 });
+      const poids = c.poids ?? 1;
       if (c.gagnant) {
-        s.points[c.gagnant] += POINTS.victoire;
+        s.points[c.gagnant] += POINTS.victoire * poids;
         s.victoires[c.gagnant]++;
         d[c.gagnant]++;
       } else {
-        s.points[a] += POINTS.nul;
-        s.points[b] += POINTS.nul;
+        s.points[a] += POINTS.nul * poids;
+        s.points[b] += POINTS.nul * poids;
         s.nulles++;
       }
     }
@@ -278,13 +286,13 @@ function evenementsHistoire(
 ): Evenement[] {
   const actu: Evenement[] = [];
   const epreuves = new Map(bilans.flatMap((d) => d.epreuves.map((e) => [e.cle, e] as const)));
-  const compteurs = new Map<string, { v: Record<string, number>; meneur: string | null }>();
+  const compteurs = new Map<string, { v: Record<string, number>; meneur: string | null; joues: number }>();
   const autre = (j: string) => (j === a ? b : a);
 
   for (const { c, joueur, n } of series(confs)) {
-    const cpt = compteurs.get(c.epreuve) ?? { v: { [a]: 0, [b]: 0 }, meneur: null };
+    const cpt = compteurs.get(c.epreuve) ?? { v: { [a]: 0, [b]: 0 }, meneur: null, joues: 0 };
     compteurs.set(c.epreuve, cpt);
-    if (c.gagnant) cpt.v[c.gagnant]++;
+    if (c.gagnant) { cpt.v[c.gagnant] += c.poids ?? 1; cpt.joues++; }
     const base = { date: c.date, discipline: c.discipline, joueurs: [a, b], lien: c.lien };
 
     if (c.gagnant) {
@@ -296,8 +304,7 @@ function evenementsHistoire(
       });
       const meneur = cpt.v[a] === cpt.v[b] ? null : cpt.v[a] > cpt.v[b] ? a : b;
       const e = epreuves.get(c.epreuve)?.nom ?? c.titre;
-      const total = cpt.v[a] + cpt.v[b];
-      if (meneur !== cpt.meneur && total > 1) {
+      if (meneur !== cpt.meneur && cpt.joues > 1) {
         const type = meneur === null ? 'egalisation' : cpt.meneur === null ? 'premiereCeinture' : 'bascule';
         actu.push({
           ...base, id: `b:${c.id}`, type: 'bascule', date: c.date + 1, notif: true,

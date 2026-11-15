@@ -3,6 +3,8 @@
 export type Cadence = 'rapide' | 'blitz' | 'bullet';
 export const CADENCES: Cadence[] = ['rapide', 'blitz', 'bullet'];
 export const NOM_CADENCE: Record<Cadence, string> = { rapide: 'Rapide', blitz: 'Blitz', bullet: 'Bullet' };
+/** Ce que pèse une partie dans le face-à-face : plus la cadence est longue, plus la victoire compte. */
+export const POIDS_CADENCE: Record<Cadence, number> = { rapide: 3, blitz: 2, bullet: 1 };
 export const CLE_STATS = { rapide: 'chess_rapid', blitz: 'chess_blitz', bullet: 'chess_bullet' } as const;
 
 export type Issue =

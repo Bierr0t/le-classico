@@ -42,6 +42,8 @@ export type Epreuve = {
   affichage?: Record<string, string>;
   /** 1 : le plus grand gagne. -1 : le plus petit gagne. */
   sens?: 1 | -1;
+  /** Duel seulement : la règle de pondération, en une phrase, quand toutes les victoires ne se valent pas. */
+  regle?: string;
   /** Pique prête à l'emploi. {a} tenant, {b} l'autre, {va} {vb} leurs valeurs, {e} l'écart. */
   pique?: string;
 };
@@ -55,6 +57,8 @@ export type Confrontation = {
   joueurs: string[];
   /** null : match nul. */
   gagnant: string | null;
+  /** Ce que pèse cette confrontation dans sa ceinture et dans la saison. 1 par défaut. */
+  poids?: number;
   /** Ce qui s'est joué : « Bullet », « 501 », « Battle de problèmes ». */
   titre: string;
   /** Score par joueur quand il y en a un (legs, problèmes résolus). */
@@ -114,6 +118,9 @@ export type Ceinture = {
   /** Ce que chacun affiche en face de la ceinture. */
   affichage: Record<string, string>;
   nulles?: number;
+  /** Duel : nombre de victoires de chacun, quand il diffère des points affichés (épreuve pondérée). */
+  victoires?: Record<string, number>;
+  regle?: string;
 };
 
 export type Saison = {

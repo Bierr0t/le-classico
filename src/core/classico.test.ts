@@ -117,6 +117,16 @@ describe('moteur', () => {
   });
 });
 
+describe('pondération', () => {
+  it('fait peser une victoire selon son poids, dans la ceinture comme dans la saison', () => {
+    const rapide = { ...duel('2026-11-01', 'pierrot'), poids: 3 };
+    const d = calculer(config, [bilan([rapide, duel('2026-11-02', 'fabos'), duel('2026-11-03', 'fabos')])], MAINTENANT, null).duels[0];
+    expect(d.ceintures[0]).toMatchObject({ tenant: 'pierrot', affichage: { pierrot: '3', fabos: '2' }, victoires: { pierrot: 1, fabos: 2 } });
+    expect(d.saisons[0].points).toEqual({ pierrot: 9, fabos: 6 });
+    expect(d.bilan.victoires).toEqual({ pierrot: 1, fabos: 2 });
+  });
+});
+
 describe('saisies manuelles', () => {
   it('transforme les saisies en confrontations, dans l\'ordre de la journée', () => {
     const c = confrontationsSaisies([
@@ -169,7 +179,7 @@ describe('échecs', () => {
       battles: [{ date: '2026-11-10', gagnant: 'pierrot' }],
     }, config);
     expect(b.confrontations.map((c) => c.epreuve)).toEqual(['echecs.duel', 'echecs.battle']);
-    expect(b.confrontations[0]).toMatchObject({ gagnant: 'fabos', titre: 'Blitz', detail: 'par mat en 12 coups' });
+    expect(b.confrontations[0]).toMatchObject({ gagnant: 'fabos', titre: 'Blitz', poids: 2, detail: 'par mat en 12 coups' });
     expect(b.trophees![0].obtenus.fabos).toBeDefined();
     const d = calculer(config, [b], MAINTENANT, null).duels[0];
     const tenant = (cle: string) => d.ceintures.find((c) => c.epreuve === cle)!.tenant;

@@ -1,6 +1,6 @@
 import type { BilanDiscipline, Config, Confrontation, Epreuve, Fait, TropheeObtenu } from '../../types.ts';
 import { confrontationsSaisies, type Saisie } from '../contrat.ts';
-import { CADENCES, CLE_STATS, NOM_CADENCE, NOM_ISSUE, type Partie, type ProfilApi, type StatsApi } from './chesscom.ts';
+import { CADENCES, CLE_STATS, NOM_CADENCE, NOM_ISSUE, POIDS_CADENCE, type Partie, type ProfilApi, type StatsApi } from './chesscom.ts';
 
 export type SourceEchecs = {
   /** Clé du joueur dans le Classico. */
@@ -52,7 +52,10 @@ export function calculerEchecs(brut: BrutEchecs, config: Config): BilanDisciplin
       ...mesure((s) => s.stats?.[CLE_STATS[cad]]?.last?.rating),
       pique: `Elo ${NOM_CADENCE[cad].toLowerCase()} : {a} {va}, {b} {vb}. {e} points d'écart, ça se voit sur l'échiquier.`,
     })),
-    { cle: 'echecs.duel', nom: 'Face-à-face aux échecs', genre: 'duel', majeure: true },
+    {
+      cle: 'echecs.duel', nom: 'Face-à-face aux échecs', genre: 'duel', majeure: true,
+      regle: `Aux échecs, une victoire en rapide pèse ${POIDS_CADENCE.rapide}, en blitz ${POIDS_CADENCE.blitz}, en bullet ${POIDS_CADENCE.bullet}.`,
+    },
     {
       cle: 'echecs.problemes', nom: 'Record aux problèmes', genre: 'mesure', majeure: false, sens: 1,
       ...mesure((s) => s.stats?.tactics?.highest?.rating),
@@ -80,7 +83,7 @@ export function calculerEchecs(brut: BrutEchecs, config: Config): BilanDisciplin
     const coups = p.coups ? ` en ${p.coups} coups` : '';
     confrontations.push({
       id: p.id, discipline: 'echecs', epreuve: 'echecs.duel', date: p.fin, joueurs: [blancs, noirs], gagnant,
-      titre: NOM_CADENCE[p.cadence],
+      titre: NOM_CADENCE[p.cadence], poids: POIDS_CADENCE[p.cadence],
       detail: gagnant ? `${NOM_ISSUE[p.issue]}${coups}` : NOM_ISSUE[p.issue],
       lien: p.id,
     });

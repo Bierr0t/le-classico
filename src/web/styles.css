@@ -322,6 +322,8 @@ button.carte:active, a.carte:active { transform: scale(0.985); }
 }
 .duel-date { font-size: 13px; color: var(--sourd); }
 .duel-quoi { font-size: 14px; }
+.poids { margin-left: 6px; padding: 0 5px; border-radius: 5px; background: var(--surface-haute); color: var(--or); font-size: 11px; font-weight: 800; }
+.regle-epreuve { margin-top: 8px; }
 .duel-quoi small { display: block; color: var(--sourd); font-size: 12px; }
 
 .identite { display: flex; align-items: center; gap: 18px; }

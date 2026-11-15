@@ -38,12 +38,17 @@ export function FicheDiscipline({ cle, onFermer }: { cle: string; onFermer: () =
           {ceintures.map((c) => (
             <LigneFace
               key={c.epreuve} nom={c.nom} va={c.affichage[a.cle]} vb={c.affichage[b.cle]} tenant={c.tenant} points={c.points}
-              note={c.tenant
-                ? `${nom(c.tenant)}${c.depuis ? ` depuis le ${dateCourte(c.depuis)}` : ''}${c.nulles ? ` · ${c.nulles} nul${c.nulles > 1 ? 's' : ''}` : ''}`
-                : c.genre === 'duel' && Number(c.affichage[a.cle]) + Number(c.affichage[b.cle]) === 0 ? 'jamais disputée' : 'vacante'}
+              note={[
+                c.tenant
+                  ? `${nom(c.tenant)}${c.depuis ? ` depuis le ${dateCourte(c.depuis)}` : ''}`
+                  : c.genre === 'duel' && Number(c.affichage[a.cle]) + Number(c.affichage[b.cle]) === 0 ? 'jamais disputée' : 'vacante',
+                c.victoires && `${c.victoires[a.cle]} victoires à ${c.victoires[b.cle]}`,
+                c.nulles && `${c.nulles} nul${c.nulles > 1 ? 's' : ''}`,
+              ].filter(Boolean).join(' · ')}
             />
           ))}
         </ul>
+        {ceintures.filter((c) => c.regle).map((c) => <p key={c.epreuve} className="note regle-epreuve">{c.regle}</p>)}
       </section>
 
       {d.saisies && inst.depot && (
@@ -80,7 +85,7 @@ export function FicheDiscipline({ cle, onFermer }: { cle: string; onFermer: () =
                     <span className="duel-date">{dateCourte(c.date)}</span>
                     <span className="duel-quoi">
                       <b style={teinte(c.gagnant)} className={c.gagnant ? 'teinte' : undefined}>{c.gagnant ? nom(c.gagnant) : 'Nul'}</b>
-                      {score} · {c.titre}
+                      {score} · {c.titre}{(c.poids ?? 1) > 1 && <span className="poids">×{c.poids}</span>}
                       {c.detail && <small>{c.detail}</small>}
                     </span>
                     {c.lien && <span className="chevron" aria-hidden="true">›</span>}
