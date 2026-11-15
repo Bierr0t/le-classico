@@ -22,6 +22,8 @@ export type Config = {
   manuelles?: DisciplineManuelle[];
   gages: string[];
   ntfy?: string;
+  /** Clé publique des notifications push, créée par « npm run cles-push ». */
+  push?: { clePublique: string };
   url?: string;
   depot?: string;
 };
@@ -176,6 +178,8 @@ export type Instantane = {
   url?: string;
   depot?: string;
   ntfy?: string;
+  /** Présent quand les notifications push sont configurées. sujet : la boîte aux lettres des abonnements. */
+  push?: { clePublique: string; sujet: string };
   joueurs: Joueur[];
   disciplines: BilanDiscipline[];
   duels: Duel[];

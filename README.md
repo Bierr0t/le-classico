@@ -79,6 +79,22 @@ Le score, les saisons, le fil, les munitions, les trophées et l'interface suive
 
 Ajouter une entrée à `joueurs` dans `classico.json`. Le moteur calcule un duel par paire, et un sélecteur de duel apparaît dans l'en-tête. L'app reste pensée pour un face-à-face : voir la section 9 des specs.
 
+## Installer l'app sur un iPhone
+
+Ouvrir le site dans Safari, toucher Partager, puis « Sur l'écran d'accueil ». L'app s'ouvre ensuite en plein écran, avec son icône.
+
 ## Notifications
 
-Le sujet ntfy est dans `classico.json`. Chacun s'y abonne depuis l'onglet Chambrage. Rien n'est envoyé entre 23 h et 8 h, ni plus de six messages par jour.
+Rien n'est envoyé entre 23 h et 8 h, ni plus de six messages par jour. Deux canaux :
+
+- **Dans l'app installée** (iOS 16.4 et plus, Android) : onglet Chambrage, « Activer les notifications ». Sur iPhone, il faut d'abord installer l'app sur l'écran d'accueil : Safari seul ne sait pas recevoir de push.
+- **Par ntfy** : le sujet est dans `classico.json`, on s'y abonne avec l'app ntfy.
+
+Mise en service du push, une seule fois :
+
+```sh
+npm run cles-push     # clé privée dans les secrets du dépôt, clé publique dans classico.json
+git commit -am "Activer les notifications push" && git push
+```
+
+Comment ça marche sans serveur : le téléphone s'abonne auprès d'Apple ou de Google, puis dépose son abonnement dans une boîte aux lettres (le sujet ntfy `…-abonnements`). Le collecteur la relève à chaque passage, garde les abonnements chiffrés sur la branche `donnees`, et envoie les notifications signées par la clé privée. Un abonnement activé reçoit un message de bienvenue au passage suivant, une demi-heure au plus tard.

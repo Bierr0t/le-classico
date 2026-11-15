@@ -1,7 +1,61 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useClassico } from '../App.tsx';
 import { partagerAffiche } from '../affiche.ts';
 import { Avatar, BoutonEnvoyer } from '../composants.tsx';
+import { activer, desactiver, etatNotifs, type EtatNotifs } from '../notifications.ts';
+
+function Notifications() {
+  const { inst, annoncer } = useClassico();
+  const [etat, setEtat] = useState<EtatNotifs | null>(null);
+  const [occupe, setOccupe] = useState(false);
+  useEffect(() => { etatNotifs(inst).then(setEtat); }, [inst]);
+
+  const basculer = async (action: typeof activer) => {
+    setOccupe(true);
+    try {
+      const suite = await action(inst);
+      setEtat(suite);
+      if (suite === 'actives') annoncer('C\'est activé. Un message de bienvenue arrive d\'ici une demi-heure.');
+      if (suite === 'refusees') annoncer('Refusé. Ça se rattrape dans les réglages du téléphone.');
+    } catch {
+      annoncer('L\'activation n\'a pas marché. Réessaie dans un instant.');
+    }
+    setOccupe(false);
+  };
+
+  if (!etat || (etat === 'indisponible' && !inst.ntfy)) return null;
+  const ntfy = inst.ntfy && (
+    <a className="lien" href={`https://ntfy.sh/${inst.ntfy}`} target="_blank" rel="noreferrer">
+      {etat === 'indisponible' || etat === 'incompatible' ? 'S\'abonner avec l\'app ntfy' : 'Autre moyen : l\'app ntfy'}
+    </a>
+  );
+
+  return (
+    <section className="carte notifs">
+      <div>
+        <h2>Être prévenu quand ça bouge</h2>
+        <p>Chaque duel, chaque ceinture qui change de main, chaque fin de saison. Rien entre 23 h et 8 h.</p>
+      </div>
+      {etat === 'installer' && (
+        <ol className="etapes">
+          <li>Dans Safari, touche le bouton Partager.</li>
+          <li>Choisis « Sur l'écran d'accueil ».</li>
+          <li>Ouvre Le Classico depuis son icône, reviens ici et active les notifications.</li>
+        </ol>
+      )}
+      {etat === 'inactives' && <button className="bouton" onClick={() => basculer(activer)} disabled={occupe}>{occupe ? 'Activation…' : 'Activer les notifications'}</button>}
+      {etat === 'actives' && (
+        <div className="notifs-actives">
+          <p><b>Activées sur cet appareil.</b></p>
+          <button className="lien" onClick={() => basculer(desactiver)} disabled={occupe}>Désactiver</button>
+        </div>
+      )}
+      {etat === 'refusees' && <p className="avertissement">Les notifications sont refusées pour cette app. Pour les rétablir : Réglages du téléphone, Notifications, Classico.</p>}
+      {etat === 'incompatible' && <p className="note">Ce navigateur ne sait pas recevoir de notifications d'une app web.</p>}
+      {ntfy}
+    </section>
+  );
+}
 
 export function Chambrage() {
   const { inst, duel, a, b, camp, choisirCamp, nom, autre, teinte, annoncer, joueur } = useClassico();
@@ -79,13 +133,7 @@ export function Chambrage() {
         <button className="bouton" onClick={affiche} disabled={occupe}>{occupe ? 'Impression…' : 'Partager l\'affiche'}</button>
       </section>
 
-      {inst.ntfy && (
-        <section className="regle">
-          <h2>Être prévenu quand ça bouge</h2>
-          <p>Chaque duel, chaque ceinture qui change de main et chaque fin de saison part en notification. Installe l'app ntfy, puis abonne-toi au sujet <b>{inst.ntfy}</b>.</p>
-          <a className="lien" href={`https://ntfy.sh/${inst.ntfy}`} target="_blank" rel="noreferrer">Ouvrir le sujet dans ntfy</a>
-        </section>
-      )}
+      <Notifications />
     </>
   );
 }

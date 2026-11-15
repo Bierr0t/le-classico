@@ -46,6 +46,8 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           BULLCAST_D1_ID: ${{ secrets.BULLCAST_D1_ID }}
+          # Signe les notifications push de l'app installée (npm run cles-push).
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
       - run: npm run build
 
       - name: Sauvegarder les données

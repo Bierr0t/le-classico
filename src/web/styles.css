@@ -280,8 +280,17 @@ button.carte:active, a.carte:active { transform: scale(0.985); }
 .munition p { font-weight: 600; font-size: 16px; line-height: 1.35; }
 .munition[data-forte] p { font-size: 19px; font-weight: 700; }
 .riposte { padding: 10px 14px; border-left: 3px solid var(--j); background: var(--surface); border-radius: 0 10px 10px 0; color: var(--sourd); font-size: 14px; }
-.bloc-affiche { display: grid; gap: 14px; }
-.bloc-affiche p { color: var(--sourd); font-size: 14px; margin-top: 4px; }
+.bloc-affiche, .notifs { display: grid; gap: 14px; }
+.bloc-affiche p, .notifs > div:first-child p { color: var(--sourd); font-size: 14px; margin-top: 4px; }
+.notifs h2 { font: 700 17px/1.2 var(--texte); }
+.notifs .lien { justify-self: start; }
+.notifs-actives { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.etapes { display: grid; gap: 8px; counter-reset: etape; }
+.etapes li { counter-increment: etape; display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; font-size: 14px; }
+.etapes li::before {
+  content: counter(etape); display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--or); color: var(--nuit); font-weight: 800; font-size: 13px;
+}
 
 /* --- Le fil -------------------------------------------------------------- */
 

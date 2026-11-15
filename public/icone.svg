@@ -1,7 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#0F0E13"/>
-  <path d="M0 0h230L0 400z" fill="#FF5A3C"/>
-  <path d="M512 512H282l230-400z" fill="#3D8BFF"/>
-  <circle cx="256" cy="256" r="92" fill="#F2C230"/>
-  <path d="M222 214h20l14 52 14-52h20l-24 84h-20z" fill="#0F0E13"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="or" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE27A"/>
+      <stop offset="1" stop-color="#E9A90F"/>
+    </linearGradient>
+    <linearGradient id="rouge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF7A5C"/>
+      <stop offset="1" stop-color="#E43D22"/>
+    </linearGradient>
+    <linearGradient id="bleu" x1="1" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#5CA2FF"/>
+      <stop offset="1" stop-color="#1F63E0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="#0F0E13"/>
+  <!-- Les deux coins du ring, séparés par une diagonale de nuit. -->
+  <path d="M0 0H600L340 1024H0z" fill="url(#rouge)"/>
+  <path d="M1024 1024H424L684 0H1024z" fill="url(#bleu)"/>
+  <!-- La ceinture : un médaillon d'or au centre. -->
+  <circle cx="512" cy="512" r="262" fill="#0F0E13"/>
+  <circle cx="512" cy="512" r="226" fill="url(#or)"/>
+  <circle cx="512" cy="512" r="186" fill="#0F0E13"/>
+  <!-- La couronne du tenant du titre. -->
+  <path d="M388 590L362 430l88 62 62-110 62 110 88-62-26 160z" fill="url(#or)" stroke="url(#or)" stroke-width="18" stroke-linejoin="round"/>
+  <rect x="388" y="612" width="248" height="34" rx="12" fill="url(#or)"/>
 </svg>

@@ -441,6 +441,7 @@ export function calculer(config: Config, bilans: BilanDiscipline[], maintenant: 
 
   return {
     genereLe: maintenant, nom: config.nom, url: config.url, depot: config.depot, ntfy: config.ntfy,
+    ...(config.push?.clePublique && config.ntfy ? { push: { clePublique: config.push.clePublique, sujet: `${config.ntfy}-abonnements` } } : {}),
     joueurs, disciplines: bilans, duels, actu, trophees: defs,
   };
 }

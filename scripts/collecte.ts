@@ -12,6 +12,7 @@ import type { Contexte, Saisie } from '../src/core/disciplines/contrat.ts';
 import { disciplinesActives } from '../src/core/disciplines/index.ts';
 import { calculer } from '../src/core/moteur.ts';
 import { paris } from '../src/core/temps.ts';
+import { preparerPush, type Push } from './push.ts';
 import type { BilanDiscipline, Config, Evenement, Instantane } from '../src/core/types.ts';
 
 const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -19,7 +20,7 @@ const DONNEES = join(RACINE, 'donnees');
 const MUET = process.argv.includes('--muet');
 const MAX_NOTIFS_JOUR = 6;
 
-type Etat = { notifies: string[]; envois: { jour: string; n: number; synthese: boolean }; initialise: boolean };
+type Etat = { notifies: string[]; envois: { jour: string; n: number; synthese: boolean }; initialise: boolean; pushDepuis?: string };
 
 async function lireJson<T>(chemin: string, defaut: T): Promise<T> {
   try { return JSON.parse(await readFile(chemin, 'utf8')); } catch { return defaut; }
@@ -48,7 +49,12 @@ async function ntfy(sujet: string, titre: string, message: string, lien: string)
   if (!r.ok) throw new Error(`ntfy : HTTP ${r.status}`);
 }
 
-async function notifier(actu: Evenement[], etat: Etat, config: Config) {
+async function notifier(actu: Evenement[], etat: Etat, config: Config, push: Push | null) {
+  // Deux canaux : le sujet ntfy, et le push de l'app installée.
+  const diffuser = async (texte: string, id?: string) => {
+    if (config.ntfy) await ntfy(config.ntfy, config.nom, texte, config.url ?? '');
+    await push?.envoyer(texte, id);
+  };
   const deja = new Set(etat.notifies);
   const candidats = actu.filter((e) => e.notif && !deja.has(e.id)).reverse();
   const { jour, heure } = paris(Date.now() / 1000);
@@ -62,13 +68,13 @@ async function notifier(actu: Evenement[], etat: Etat, config: Config) {
     else aEnvoyer.push(e);
   }
   const silence = heure >= 23 || heure < 8;
-  if (aEnvoyer.length && config.ntfy && !MUET && !silence) {
+  if (aEnvoyer.length && (config.ntfy || push) && !MUET && !silence) {
     for (const e of aEnvoyer) {
       if (etat.envois.n < MAX_NOTIFS_JOUR) {
-        await ntfy(config.ntfy, config.nom, e.texte, config.url ?? '');
+        await diffuser(e.texte, e.id);
         etat.envois.n++;
       } else if (!etat.envois.synthese) {
-        await ntfy(config.ntfy, config.nom, 'Ça bouge encore. La suite est dans le fil.', config.url ?? '');
+        await diffuser('Ça bouge encore. La suite est dans le fil.', 'synthese');
         etat.envois.synthese = true;
       }
       deja.add(e.id);
@@ -108,7 +114,9 @@ async function main() {
   }
 
   const instantane = calculer(config, bilans, maintenant, precedent);
-  await notifier(instantane.actu, etat, config);
+  const push = await preparerPush(config, join(DONNEES, 'abonnements.chiffre'), etat, MUET);
+  await notifier(instantane.actu, etat, config, push);
+  await push?.ranger();
 
   await ecrireJson(cheminEtat, etat);
   await ecrireJson(join(DONNEES, 'instantane.json'), instantane);

@@ -4,5 +4,8 @@ import '@fontsource/anton';
 import '@fontsource-variable/archivo';
 import './styles.css';
 import { App } from './App.tsx';
+import { enregistrerServiceWorker } from './notifications.ts';
+
+enregistrerServiceWorker();
 
 createRoot(document.getElementById('racine')!).render(<StrictMode><App /></StrictMode>);

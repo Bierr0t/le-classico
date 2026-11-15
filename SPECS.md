@@ -251,6 +251,13 @@ Les événements par jour, du plus récent au plus ancien. Ceux survenus depuis 
 
 **Notifications.** Duel, bascule de ceinture, changement de meneur, série de 5 et plus, fin de saison. Rien entre 23 h et 8 h, six messages par jour au maximum, puis un message de synthèse.
 
+Deux canaux reçoivent les mêmes messages :
+
+- **l'app installée** (push web, iOS 16.4 et plus, Android). On l'active depuis l'onglet Chambrage. Sur iPhone, l'app doit d'abord être ajoutée à l'écran d'accueil ; l'écran l'explique en trois étapes quand on l'ouvre dans Safari ;
+- **ntfy**, pour qui préfère.
+
+Le push fonctionne sans serveur. Le téléphone s'abonne auprès d'Apple ou de Google, puis dépose son abonnement dans une boîte aux lettres (un sujet ntfy) que le collecteur relève à chaque passage. Les abonnements sont gardés chiffrés ; les envois sont signés par une clé privée rangée dans les secrets du dépôt. Conséquence : un appareil qui vient d'activer les notifications reçoit son message de bienvenue au passage suivant, une demi-heure au plus tard.
+
 ## 8. Design
 
 **Parti pris : l'affiche de gala, la nuit.** Un fond presque noir, deux couleurs qui s'affrontent (une par coin, réglables dans `classico.json`), et l'or pour ce qui se gagne. Le Vestiaire était un album de vignettes, bleu et joueur ; le Classico est un face-à-face, tendu.

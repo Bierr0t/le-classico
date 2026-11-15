@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { abonnementValide, appliquer, chiffrer, dechiffrer } from '../../scripts/push.ts';
 import { construire, construireLien, lireFormulaire } from '../../scripts/resultat.ts';
 import { codeBattle, saisieDepuisBattle } from './disciplines/echecs/battles.ts';
 import { confrontationsSaisies } from './disciplines/contrat.ts';
@@ -221,6 +222,43 @@ describe('battles de problèmes', () => {
   it('refuse une battle en cours ou jouée contre quelqu\'un d\'autre', () => {
     expect(saisieDepuisBattle(battle(joueur('bi3rmat', '', 0, 0), joueur('fabosinho', '', 0, 0), 'created'), comptes, 'x')).toMatch(/pas terminée/);
     expect(saisieDepuisBattle(battle(joueur('bi3rmat', 'win', 30, 1), joueur('Inconnu', 'loss', 10, 3)), comptes, 'x')).toMatch(/pas un duel/);
+  });
+});
+
+describe('notifications push', () => {
+  const abo = (n: number, hote = 'web.push.apple.com') => ({ endpoint: `https://${hote}/${n}`, keys: { p256dh: 'cle', auth: 'auth' } });
+
+  it('n\'accepte que les services de push des navigateurs', () => {
+    expect(abonnementValide(abo(1))).toBe(true);
+    expect(abonnementValide(abo(1, 'fcm.googleapis.com'))).toBe(true);
+    expect(abonnementValide(abo(1, 'exemple.fr'))).toBe(false);
+    expect(abonnementValide({ endpoint: 'http://web.push.apple.com/1', keys: { p256dh: 'a', auth: 'b' } })).toBe(false);
+    expect(abonnementValide({ endpoint: 'https://web.push.apple.com/1' })).toBe(false);
+  });
+
+  it('applique abonnements et désabonnements dans l\'ordre, sans doublon', () => {
+    const r = appliquer([abo(1)], [
+      { type: 'abonner', abonnement: abo(1) },
+      { type: 'abonner', abonnement: { ...abo(2), intrus: 'x' } },
+      { type: 'abonner', abonnement: abo(3, 'exemple.fr') },
+      { type: 'abonner', abonnement: abo(4) },
+      { type: 'desabonner', endpoint: abo(4).endpoint },
+      'n\'importe quoi', null,
+    ]);
+    expect(r.abonnements).toEqual([abo(1), abo(2)]);
+    expect(r.nouveaux).toEqual([abo(2)]);
+  });
+
+  it('plafonne le nombre d\'appareils', () => {
+    const r = appliquer([], Array.from({ length: 30 }, (_, i) => ({ type: 'abonner', abonnement: abo(i) })));
+    expect(r.abonnements).toHaveLength(20);
+  });
+
+  it('chiffre les abonnements au repos', () => {
+    const secret = chiffrer([abo(1)], 'cle-privee');
+    expect(secret).not.toContain('apple');
+    expect(dechiffrer(secret, 'cle-privee')).toEqual([abo(1)]);
+    expect(() => dechiffrer(secret, 'autre-cle')).toThrow();
   });
 });
 
